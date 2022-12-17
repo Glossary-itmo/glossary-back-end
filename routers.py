@@ -10,11 +10,11 @@ from schemas import ResultBase, NodeBase, EdgeBase
 
 def file_name(file):
     if file == "main":
-        return "data.json"
+        return "static/data.json"
     elif file == "node":
-        return  "node_data.json"
+        return  "static/node_data.json"
     elif file == "edge":
-        return "edge_data.json"
+        return "static/edge_data.json"
     else:
         return {f"No file with the name { file }"}
 
@@ -45,4 +45,4 @@ async def delete_nodes(nodes: List[str]):
 
 @router.delete('/delete/edges')
 async def delete_edges(edges: List[str]):
-    return delete_edge(edges, fileName=file_name("edg"))
+    return delete_edge(edges, fileName=file_name("edge"))
