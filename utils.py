@@ -119,6 +119,8 @@ def delete_edges(new_data, fieldName, fileName):
 
 
 def get_data(fileName):
+    if check_if_empty(fileName=fileName) is True:
+        return {'message': 'No data'}
     with open(fileName, 'r') as data:
         read_data = json.load(data)
         return read_data
@@ -135,7 +137,6 @@ def post_node(nodes, fileName):
 def post_edge(edges, fileName):
     name = "edges"
     if check_if_empty(fileName) is True:
-        print("true")
         return create_file(data=edges, write_to=name, fileName=fileName)
     return post_data(data=edges, write_to=name, fileName=fileName)
 
