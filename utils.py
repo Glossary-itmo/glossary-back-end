@@ -1,7 +1,11 @@
+import os
+import json
 from fastapi import HTTPException
 
 from schemas import ResultBase
-import json
+
+from json.decoder import JSONDecodeError
+
 
 
 def check_if_duplicate_key(old_data, new_data, fieldName, fileName):
@@ -9,6 +13,7 @@ def check_if_duplicate_key(old_data, new_data, fieldName, fileName):
     True - есть дубликаты в новых данных
     False - нет дубликатов в новых данных"""
 
+    old_data = [old_data]
     extract = lambda data : list(map(lambda x : x["key"], data))
     old_keys = extract(old_data) 
     new_keys = extract(new_data)
@@ -45,20 +50,43 @@ def create_file(data, write_to, fileName):
     """ В случае если нет файла json или он пустой создать json и его базовые состовляющие"""
 
     with open(fileName, "w+") as base_file:
-        # Взять ResultBase и конвертировать её в json
-        base = json.loads(ResultBase().json())
+        
+        if fileName == "main":
+            # Взять ResultBase и конвертировать её в json
+            base = json.loads(ResultBase().json())
+
+            # Записать ResultBase в base_file
+            json.dump(base, base_file, indent=2)
+
         new_data = [i.dict() for i in data]
-        base_file.seek(0)
-        json.dump(new_data, base_file, indent=2)
+
+        # base_file.seek(0)
+        # json.dump(new_data, base_file, indent=2)
+
+        for i, ready_data in enumerate(new_data):
+            if (len(new_data) - 1) == i:
+                base_file.write(json.dumps(ready_data))
+            else:
+                base_file.write(json.dumps(ready_data) + "," + "\n")
         return base_file
 
 
 def post_data(data, write_to, fileName):
     with open(fileName, 'a+') as base_file:
         base_file.seek(0)
-        read_data = json.load(base_file)
-        print(read_data)
+
+        try:
+            read_data = json.load(base_file)
+        except JSONDecodeError:
+            pass
+
+        # print(read_data)
         new_data = [i.dict() for i in data]
+
+        # print(read_data)
+        # [read_data[write_to].append(piece) for piece in new_data]
+        # print(read_data)
+        # json.dump(new_data, base_file, indent=2)
 
         if check_if_duplicate_key(
                 old_data=read_data, 
@@ -76,11 +104,16 @@ def post_data(data, write_to, fileName):
                 raise HTTPException(
                         status_code=403, 
                         detail="Forbidden, this direction already exists")
-        
-        # [read_data.append(i) for i in new_data]
-        # base_file.seek(0, 2)
-        # json.dump(new_data, base_file, indent=2)
-        [base_file.write(json(ready_data)) for ready_data in new_data]
+
+        for i, ready_data in enumerate(new_data):
+            if len(new_data) == 1:
+                base_file.write(",\n" + json.dumps(ready_data))
+            elif (len(new_data) - 1) == i:
+                base_file.write(json.dumps(ready_data))
+            elif i == 0:
+                base_file.write(",\n" + json.dumps(ready_data) + ",\n")
+            else:
+                base_file.write(json.dumps(ready_data) + ",\n")
         return base_file
     
 
@@ -89,12 +122,17 @@ def check_if_empty(fileName):
     пустой - True
     не пустой - False"""
 
-    try:
-        with open(fileName, "r") as check:
-            if len(json.load(check)) == 2:
-                return False
-    except: 
+    # check if size of file is 0
+    if os.stat(fileName).st_size == 0:
         return True
+    return False
+
+    # try:
+    #     with open(fileName, "r") as check:
+    #         if len(json.load(check)) == 1:
+    #             return False
+    # except: 
+    #     return True
     
 
 def delete_edges(new_data, fieldName, fileName):
