@@ -29,7 +29,7 @@ router = APIRouter()
 @router.get('/get/all', response_model=ResultBase)
 async def get_all():
     """ Вывести все содержимое base.json"""
-    return await get_data(fileName=file_name("main"))
+    return get_data(fileName=file_name("main"))
 
 
 @router.get('/get/unloading', status_code=201)
@@ -45,19 +45,19 @@ async def unloading():
 
 @router.post('/post/nodes')
 async def post_nodes(nodes: List[NodeBase]):
-    return await post_node(nodes=nodes, fileName=file_name("node"))
+    return post_node(nodes=nodes, fileName=file_name("node"))
 
 
 @router.post('/post/edges')
 async def post_edges(edges: List[EdgeBase]):
-    return await post_edge(edges, fileName=file_name("edge"))
+    return post_edge(edges, fileName=file_name("edge"))
 
 
 @router.delete('/delete/nodes')
 async def delete_nodes(nodes: List[str]):
-    return await delete_node(nodes, main_file=file_name("main"), fileName=file_name("node_delete"))
+    return delete_node(nodes, main_file=file_name("main"), fileName=file_name("node_delete"))
 
 
 @router.delete('/delete/edges')
 async def delete_edges(edges: List[str]):
-    return await delete_edge(edges, main_file=file_name("main"), fileName=file_name("edge_delete"))
+    return delete_edge(edges, main_file=file_name("main"), fileName=file_name("edge_delete"))
