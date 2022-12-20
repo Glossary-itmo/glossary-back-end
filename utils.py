@@ -1,0 +1,194 @@
+import os
+import json
+from fastapi import HTTPException
+
+from schemas import ResultBase
+
+
+
+def check_if_duplicate_key(old_data, new_data, fieldName, fileName):
+    """ Проверить если присланые ключи уже есть,
+    True - есть дубликаты в новых данных
+    False - нет дубликатов в новых данных"""
+
+    extract = lambda data : list(map(lambda x : x["key"], data))
+    old_keys = extract([json.loads(i) for i in old_data]) 
+    new_keys = extract(new_data)
+    for key in new_keys:
+        if key in old_keys:
+            return True
+    return False
+
+
+def check_if_duplicate_src_targ(new_data, old_data, fileName):
+    """ Проверить если присланные связи уже есть
+    True - есть дубликаты новых связей
+    False - нет дубликатов новых связей """
+
+    # Взять указаное "field" поле из "data" и записать в лист "x" и вернуть из lambda функции
+    # в переменную "extract"
+    extract = lambda data, field : list(map(lambda x : x[field], data))
+
+    temp_new_data = zip(
+            extract(new_data, "source"), 
+            extract(new_data, "target"))
+    temp_old_data = zip(
+            extract([json.loads(i) for i in old_data], "source"), 
+            extract([json.loads(i) for i in old_data], "target"))
+    temp_old_data_reverse = zip(
+            extract([json.loads(i) for i in old_data], "target"),
+            extract([json.loads(i) for i in old_data], "source")) 
+
+    for data in temp_new_data:
+        if data in temp_old_data or data in temp_old_data_reverse:
+            return True
+
+    return False
+
+
+def create_file(data, write_to, fileName):
+    """ В случае если нет файла json или он пустой создать json и его базовые состовляющие"""
+
+    with open(fileName, "w+") as base_file:
+        
+        if fileName == "main":
+            # Взять ResultBase и конвертировать её в json
+            base = json.loads(ResultBase().json())
+
+            # Записать ResultBase в base_file
+            json.dump(base, base_file, indent=2)
+
+        new_data = [i.dict() for i in data]
+
+        for i, ready_data in enumerate(new_data):
+            if (len(new_data) - 1) == i:
+                base_file.write(json.dumps(ready_data))
+            else:
+                base_file.write(json.dumps(ready_data) + "\n")
+        return base_file
+
+
+def post_data(data, write_to, fileName):
+    with open(fileName, 'a+') as base_file:
+        base_file.seek(0)
+
+        # read_data = json.load(base_file)
+        read_data = base_file.readlines()
+        new_data = [i.dict() for i in data]
+
+
+        if check_if_duplicate_key(
+                old_data=read_data, 
+                new_data=new_data, 
+                fieldName=write_to,
+                fileName=fileName) is True:
+            raise HTTPException(
+                    status_code=403, 
+                    detail="Forbidden, already exists")
+        if write_to == "edges":
+            if check_if_duplicate_src_targ(
+                old_data=read_data, 
+                new_data=new_data,
+                fileName=fileName) is True:
+                raise HTTPException(
+                        status_code=403, 
+                        detail="Forbidden, this direction already exists")
+
+
+        for i, ready_data in enumerate(new_data):
+            if len(new_data) == 1:
+                base_file.write("\n" + json.dumps(ready_data))
+            elif (len(new_data) - 1) == i:
+                base_file.write(json.dumps(ready_data))
+            elif i == 0:
+                base_file.write("\n" + json.dumps(ready_data) + "\n")
+            else:
+                base_file.write(json.dumps(ready_data) + "\n")
+        return base_file
+    
+
+def check_if_empty(fileName):
+    """ Проверить что json пустой,
+    пустой - True
+    не пустой - False"""
+
+    # check if size of file is 0
+    if os.stat(fileName).st_size == 0:
+        return True
+    return False
+    
+
+def delete(new_data, fieldName, fileName):
+    ready_new_data = []
+    [ready_new_data.append({"key": key}) for key in new_data]
+    
+    with open(fileName, "a+") as base_file:
+        [base_file.write(json.dumps(i) + "\n") for i in ready_new_data]
+
+
+# End of secondary functions
+# Start of the utils
+
+
+def get_data(fileName):
+    if check_if_empty(fileName=fileName) is True:
+        return {'message': 'No data'}
+
+    with open(fileName, 'r') as data:
+        read_data = json.load(data)
+        return read_data
+
+
+def unload(edges, nodes, main):
+    nodes_name = "nodes"
+    edges_name = "edges"
+
+    with open(main, "r+") as main_file:
+        read_main_data = json.load(main_file)
+
+        nodes_base = open(nodes, "r").readlines()
+        node_base = [json.loads(node) for node in nodes_base]
+
+        edges_base = open(edges, "r").readlines()
+        edge_base = [json.loads(edge) for edge in edges_base]
+
+        [read_main_data[nodes_name].append(piece) for piece in node_base]
+        [read_main_data[edges_name].append(piece) for piece in edge_base]
+
+        main_file.seek(0)
+        json.dump(read_main_data, main_file, indent=2)
+
+
+
+def post_node(nodes, fileName):
+    name = "nodes"
+
+    if check_if_empty(fileName=fileName) is True:
+        return create_file(data=nodes, write_to=name, fileName=fileName)
+    return post_data(data=nodes, write_to=name, fileName=fileName)
+            
+        
+
+def post_edge(edges, fileName):
+    name = "edges"
+
+    if check_if_empty(fileName) is True:
+        return create_file(data=edges, write_to=name, fileName=fileName)
+    return post_data(data=edges, write_to=name, fileName=fileName)
+
+
+def delete_node(nodes, main_file, fileName):
+    name = "nodes"
+
+    # if check_if_empty(fileName=main_file) is True:
+    #     raise HTTPException(status_code=404, detail="Nodes not found")
+    return delete(new_data=nodes, fieldName=name, fileName=fileName)
+
+
+def delete_edge(edges, main_file, fileName):
+    name = "edges"
+
+    # if check_if_empty(fileName=main_file) is True:
+    #     raise HTTPException(status_code=404, detail="Edges not found")
+    return delete(new_data=edges, fieldName=name, fileName=fileName)
+    
