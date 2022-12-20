@@ -15,6 +15,10 @@ def file_name(file):
         return  "static/node_data.txt"
     elif file == "edge":
         return "static/edge_data.txt"
+    elif file == "node_delete":
+        return "static/node_deleted.txt"
+    elif file == "edge_delete":
+        return "static/edge_deleted.txt"
     else:
         return {f"No file with the name { file }"}
 
@@ -51,9 +55,9 @@ async def post_edges(edges: List[EdgeBase]):
 
 @router.delete('/delete/nodes')
 async def delete_nodes(nodes: List[str]):
-    return delete_node(nodes, fileName=file_name("node"))
+    return delete_node(nodes, main_file=file_name("main"), fileName=file_name("node_delete"))
 
 
 @router.delete('/delete/edges')
 async def delete_edges(edges: List[str]):
-    return delete_edge(edges, fileName=file_name("edge"))
+    return delete_edge(edges, main_file=file_name("main"), fileName=file_name("edge_delete"))
