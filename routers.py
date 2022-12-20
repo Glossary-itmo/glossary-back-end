@@ -32,9 +32,9 @@ async def get_all():
 async def unloading():
     """ Удалить помеченые для удаления и обновить информацию в base.json"""
     unload(
-        edges=get_data(fileName=file_name("edge")), 
-        nodes=get_data(fileName=file_name("node")), 
-        main=get_data(fileName=file_name("main"))
+        edges=file_name("edge"), 
+        nodes=file_name("node"), 
+        main=file_name("main")
         )
     return {"detail": "Created"}
 
