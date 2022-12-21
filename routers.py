@@ -28,8 +28,12 @@ router = APIRouter()
 
 @router.get('/get/all', response_model=ResultBase)
 async def get_all():
-    """ Вывести все содержимое base.json"""
-    return get_data(fileName=file_name("main"))
+    """ Вывести все содержимое base.json за исключением элементов помеченных на удаление"""
+    return get_data(
+        fileName=file_name("main"), 
+        nodeDeleted=file_name("node_delete"),
+        edgeDeleted=file_name("edge_delete")
+        )
 
 
 @router.get('/get/unloading', status_code=201)

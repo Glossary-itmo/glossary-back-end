@@ -1,19 +1,49 @@
 import json
 from fastapi import HTTPException
 
-from utils.utils import (
+from utils.utils import (create_file, post_data, delete)
+from utils.checks import (
     check_if_duplicate_key, check_if_duplicate_src_targ,
-    create_file, post_data, check_if_empty,
-    delete
-    )
+    check_if_empty,
+)
 
 
-def get_data(fileName):
+def get_data(fileName, nodeDeleted, edgeDeleted):
+    node_name = "nodes"
+    edge_name = "edges"
     if check_if_empty(fileName=fileName) is True:
         return {'message': 'No data'}
 
-    with open(fileName, 'r') as data:
-        read_data = json.load(data)
+    with open(fileName, 'r') as base_data:
+        read_data = json.load(base_data)
+
+        turn_to_json = lambda data : [json.loads(i) for i in data]
+        get_deleted_keys = lambda data : [i["key"] for i in data]
+        get_results = lambda data, name, deleted : \
+            [element \
+            for i, element in enumerate(data[name]) \
+            if element["key"] not in deleted]
+
+        node_deleted = open(nodeDeleted).readlines()
+        edge_deleted = open(edgeDeleted).readlines()
+        node_deleted = turn_to_json(node_deleted)
+        edge_deleted = turn_to_json(edge_deleted)
+        node_deleted_keys = get_deleted_keys(node_deleted)
+        edge_deleted_keys = get_deleted_keys(edge_deleted)
+
+        nodes_result, edges_result = [], []
+        nodes_result = get_results(
+            data=read_data, 
+            name=node_name, 
+            deleted=node_deleted_keys)
+        edges_result = get_results(
+            data=read_data, 
+            name=edge_name, 
+            deleted=edge_deleted_keys) 
+
+        read_data[node_name] = nodes_result.copy()
+        read_data[edge_name] = edges_result.copy()
+
         return read_data
 
 
