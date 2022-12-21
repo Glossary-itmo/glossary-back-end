@@ -2,7 +2,7 @@ import json
 from fastapi import HTTPException
 from schemas import ResultBase
 
-from checks import (
+from utils.checks import (
     check_if_duplicate_key, check_if_duplicate_src_targ,
     check_if_empty
     )

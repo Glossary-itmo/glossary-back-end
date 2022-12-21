@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from typing import List
 
-from crud import (
+from utils.crud import (
         get_data, unload, post_node, post_edge,
         delete_node, delete_edge)
 from schemas import ResultBase, NodeBase, EdgeBase
