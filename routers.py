@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from typing import List
 
-from utils import (
+from crud import (
         get_data, unload, post_node, post_edge,
         delete_node, delete_edge)
 from schemas import ResultBase, NodeBase, EdgeBase
@@ -55,9 +55,9 @@ async def post_edges(edges: List[EdgeBase]):
 
 @router.delete('/delete/nodes')
 async def delete_nodes(nodes: List[str]):
-    return delete_node(nodes, main_file=file_name("main"), fileName=file_name("node_delete"))
+    return delete_node(nodes, mainFile=file_name("main"), fileName=file_name("node_delete"))
 
 
 @router.delete('/delete/edges')
 async def delete_edges(edges: List[str]):
-    return delete_edge(edges, main_file=file_name("main"), fileName=file_name("edge_delete"))
+    return delete_edge(edges, mainFile=file_name("main"), fileName=file_name("edge_delete"))
