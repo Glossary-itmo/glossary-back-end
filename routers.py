@@ -44,24 +44,28 @@ async def unloading():
         nodes=file_name("node"), 
         main=file_name("main")
         )
-    return {"detail": "Created"}
+    return {"detail": "Cleared deleted and unloaded new submitions"}
 
 
 @router.post('/post/nodes')
 async def post_nodes(nodes: List[NodeBase]):
+    ''' Добавить один или несколько "node(s)" '''
     return post_node(nodes=nodes, fileName=file_name("node"))
 
 
 @router.post('/post/edges')
 async def post_edges(edges: List[EdgeBase]):
+    ''' Добавить один или несколько "edge(s)" '''
     return post_edge(edges, fileName=file_name("edge"))
 
 
 @router.delete('/delete/nodes')
 async def delete_nodes(nodes: List[str]):
+    ''' Удалить один или несоколько "node(s)" '''
     return delete_node(nodes, mainFile=file_name("main"), fileName=file_name("node_delete"))
 
 
 @router.delete('/delete/edges')
 async def delete_edges(edges: List[str]):
+    ''' Удалить один или несоколько "edge(s)" '''
     return delete_edge(edges, mainFile=file_name("main"), fileName=file_name("edge_delete"))
