@@ -33,8 +33,6 @@ def create_file(data, write_to, fileName):
 def post_data(data, write_to, fileName):
     with open(fileName, 'a+') as base_file:
         base_file.seek(0)
-
-        # read_data = json.load(base_file)
         read_data = base_file.readlines()
         new_data = [i.dict() for i in data]
 
@@ -70,14 +68,11 @@ def post_data(data, write_to, fileName):
     
 
 def delete(new_data, mainFile, fieldName, fileName):
-    ready_new_data = []
-    [ready_new_data.append({"key": key}) for key in new_data]
+    ready_new_data = [{"key": key} for key in new_data]
     
     with open(fileName, "a+") as base_file:
         base_file.seek(0)
         old_data = base_file.readlines()
-        print(old_data)
-        print(123)
         if check_if_duplicate_key(
                 old_data=old_data, 
                 new_data=ready_new_data, 
@@ -85,6 +80,5 @@ def delete(new_data, mainFile, fieldName, fileName):
                 fileName=fileName) is True:
             raise HTTPException(
                     status_code=403, 
-                    detail="Forbidden, already exists")
-        print(1)
+                    detail="Forbidden, already marked for deletion")
         [base_file.write(json.dumps(i) + "\n") for i in ready_new_data]
