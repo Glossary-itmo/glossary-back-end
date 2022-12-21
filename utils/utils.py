@@ -68,6 +68,8 @@ def post_data(data, write_to, fileName):
     
 
 def delete(new_data, mainFile, fieldName, fileName):
+    ''' Отметить node или edge для удаления '''
+
     ready_new_data = [{"key": key} for key in new_data]
     
     with open(fileName, "a+") as base_file:
