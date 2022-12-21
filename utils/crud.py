@@ -2,31 +2,50 @@ import json
 from fastapi import HTTPException
 from schemas import ResultBase
 
+from file_names import file_name
+from routers import file_name
 from utils.checks import (
     check_if_duplicate_key, check_if_duplicate_src_targ,
     check_if_empty
     )
 
 
-def create_file(data, write_to, fileName):
+def get_data(fileName, nodeDeleted, edgeDeleted):
+    ''' Получить все что есть в главном файле за исключением помеченного на удаление '''
+    node_name = "nodes"
+    edge_name = "edges"
+
+    with open(fileName, "r+") as base_data:
+        read_file = json.load(base_data)
+        read_file[node_name] = clear_deleted(
+            fileName=fileName, 
+            elmenetDeleted=nodeDeleted, 
+            name=node_name).copy()
+        read_file[edge_name] = clear_deleted(
+            fileName=fileName, 
+            elmenetDeleted=edgeDeleted, 
+            name=edge_name).copy()
+
+        return read_file
+        
+# def create_file(data, write_to, fileName):
+def create_file(fileName):
     """ В случае если нет файла json или он пустой создать json и его базовые состовляющие"""
 
     with open(fileName, "w+") as base_file:
+        # Взять ResultBase и конвертировать её в json
+        base = json.loads(ResultBase().json())
         
-        if fileName == "main":
-            # Взять ResultBase и конвертировать её в json
-            base = json.loads(ResultBase().json())
+        # Записать ResultBase в base_file
+        json.dump(base, base_file, indent=2)
 
-            # Записать ResultBase в base_file
-            json.dump(base, base_file, indent=2)
+        # new_data = [i.dict() for i in data]
 
-        new_data = [i.dict() for i in data]
-
-        for i, ready_data in enumerate(new_data):
-            if (len(new_data) - 1) == i:
-                base_file.write(json.dumps(ready_data))
-            else:
-                base_file.write(json.dumps(ready_data) + "\n")
+        # for i, ready_data in enumerate(new_data):
+        #     if (len(new_data) - 1) == i:
+        #         base_file.write(json.dumps(ready_data))
+        #     else:
+        #         base_file.write(json.dumps(ready_data) + "\n")
         return base_file
 
 
@@ -87,40 +106,46 @@ def delete(new_data, mainFile, fieldName, fileName):
         [base_file.write(json.dumps(i) + "\n") for i in ready_new_data]
 
 
-def submit_to_base_file(element, main, name):
+def clear_deleted(fileName, elmenetDeleted, name):
+    ''' Очистить файлы помеченные для удаления из главного файла'''
+    print(fileName)
+    if check_if_empty(fileName=fileName) is True:
+        return {'message': 'No data'}
+
+    if fileName == file_name("main"):
+        with open(fileName, 'r') as base_data:
+            read_data = json.load(base_data)
+
+            turn_to_json = lambda data : [json.loads(i) for i in data]
+            get_deleted_keys = lambda data : [i["key"] for i in data]
+            get_results = lambda data, name, deleted : \
+                [element \
+                for i, element in enumerate(data[name]) \
+                if element["key"] not in deleted]
+
+            element_deleted = open(elmenetDeleted).readlines()
+            element_deleted = turn_to_json(element_deleted)
+            element_deleted_keys = get_deleted_keys(element_deleted)
+
+            return get_results(
+                data=read_data, 
+                name=name, 
+                deleted=element_deleted_keys)
+
+
+def submit_to_base_file(element, element_deleted, main, name):
     ''' Занести новые элементы в главный файл '''
+    
     with open(main, "r+") as main_file:
+        # clear_deleted(fileName=main, elmenetDeleted=element, name=name)
         read_main_data = json.load(main_file)
 
         elements_base = open(element, "r").readlines()
         element_base = [json.loads(piece) for piece in elements_base]
 
+        # clear_deleted(fileName=element_deleted, elmenetDeleted=element, name=name)
+
         [read_main_data[name].append(piece) for piece in element_base]
 
         main_file.seek(0)
         json.dump(read_main_data, main_file, indent=2)
-
-
-def clear_deleted(fileName, elmenetDeleted, name):
-    ''' Очистить файлы помеченные для удаления из главного файла'''
-    if check_if_empty(fileName=fileName) is True:
-        return {'message': 'No data'}
-
-    with open(fileName, 'r') as base_data:
-        read_data = json.load(base_data)
-
-        turn_to_json = lambda data : [json.loads(i) for i in data]
-        get_deleted_keys = lambda data : [i["key"] for i in data]
-        get_results = lambda data, name, deleted : \
-            [element \
-            for i, element in enumerate(data[name]) \
-            if element["key"] not in deleted]
-
-        element_deleted = open(elmenetDeleted).readlines()
-        element_deleted = turn_to_json(element_deleted)
-        element_deleted_keys = get_deleted_keys(element_deleted)
-
-        return get_results(
-            data=read_data, 
-            name=name, 
-            deleted=element_deleted_keys)
