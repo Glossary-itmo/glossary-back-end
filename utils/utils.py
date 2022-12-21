@@ -74,8 +74,10 @@ def delete(new_data, mainFile, fieldName, fileName):
     [ready_new_data.append({"key": key}) for key in new_data]
     
     with open(fileName, "a+") as base_file:
+        base_file.seek(0)
         old_data = base_file.readlines()
         print(old_data)
+        print(123)
         if check_if_duplicate_key(
                 old_data=old_data, 
                 new_data=ready_new_data, 
