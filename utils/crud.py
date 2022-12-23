@@ -10,19 +10,19 @@ from utils.checks import (
 )
 
 
-def get_data(names, fileName, secondaries, nodeDeleted, edgeDeleted):
+def get_data(names, fileName, secondaries, secondaryDeleted):
     ''' Получить все что есть в главном файле за исключением помеченного на удаление '''
 
     with open(fileName, "r+") as base_data:
         read_file = json.load(base_data)
         read_file[names[0]] = clear_deleted(fileName=fileName,
-                                             elementDeleted=nodeDeleted,
+                                             elementDeleted=secondaryDeleted[0],
                                              name=names[0]).copy()
         read_file[names[1]] = clear_deleted(fileName=fileName,
-                                             elementDeleted=edgeDeleted,
+                                             elementDeleted=secondaryDeleted[1],
                                              name=names[1]).copy()
 
-        for file in secondaries:
+        for i, file in enumerate(secondaries):
             pass
 
         return read_file

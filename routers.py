@@ -24,8 +24,7 @@ async def get_all():
     return get_data(names=["nodes", "edges"],
                     fileName=file_name("main"),
                     secondaries=[file_name("node"), file_name("edge")],
-                    nodeDeleted=file_name("node_delete"),
-                    edgeDeleted=file_name("edge_delete")
+                    secondaryDeleted=[file_name("node_delete"), file_name("edge_delete")]
                     )
 
 
