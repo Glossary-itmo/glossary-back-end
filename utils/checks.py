@@ -2,13 +2,22 @@ import os
 import json
 
 
-def check_if_duplicate_key(old_data, new_data, fieldName, fileName):
+def check_if_duplicate_key(old_data, new_data, fieldName):
     """ Проверить если присланые ключи уже есть,
     True - есть дубликаты в новых данных
     False - нет дубликатов в новых данных"""
 
     extract = lambda data : list(map(lambda x : x["key"], data))
-    old_keys = extract([json.loads(i) for i in old_data]) 
+
+    # Check file extension
+    if old_data.endswith(".txt"):
+        old_data_temp = open(old_data, "r").readlines()
+        old_data_ready = [json.loads(i) for i in old_data_temp]
+    else:
+        old_data_temp = json.load(open(old_data, "r"))
+        old_data_ready = old_data_temp[fieldName]
+
+    old_keys = extract(old_data_ready) 
     new_keys = extract(new_data)
     for key in new_keys:
         if key in old_keys:
