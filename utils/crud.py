@@ -20,11 +20,11 @@ def get_data(fileName, nodeDeleted, edgeDeleted):
         read_file = json.load(base_data)
         read_file[node_name] = clear_deleted(
             fileName=fileName,
-            elmenetDeleted=nodeDeleted,
+            elementDeleted=nodeDeleted,
             name=node_name).copy()
         read_file[edge_name] = clear_deleted(
             fileName=fileName,
-            elmenetDeleted=edgeDeleted,
+            elementDeleted=edgeDeleted,
             name=edge_name).copy()
 
         return read_file
@@ -99,9 +99,9 @@ def delete(new_data, mainFile, fieldName, fileName):
         [base_file.write(json.dumps(i) + "\n") for i in ready_new_data]
 
 
-def clear_deleted(fileName, elmenetDeleted, name):
+def clear_deleted(fileName, elementDeleted, name):
     ''' Очистить файлы помеченные для удаления из главного файла'''
-    
+
     # print(fileName)
     if check_if_empty(fileName=fileName) is True:
         return {'message': 'No data'}
@@ -114,11 +114,10 @@ def clear_deleted(fileName, elmenetDeleted, name):
             def get_deleted_keys(data): return [i["key"] for i in data]
 
             def get_results(data, name, deleted): return \
-                [element
-                 for i, element in enumerate(data[name])
+                [element for i, element in enumerate(data[name])
                  if element["key"] not in deleted]
 
-            element_deleted = open(elmenetDeleted).readlines()
+            element_deleted = open(elementDeleted).readlines()
             element_deleted = turn_to_json(element_deleted)
             element_deleted_keys = get_deleted_keys(element_deleted)
 
@@ -132,15 +131,16 @@ def submit_to_base_file(element, element_deleted, main, name):
     ''' Занести новые элементы в главный файл '''
 
     with open(main, "r+") as main_file:
-        # clear_deleted(fileName=main, elmenetDeleted=element, name=name)
+        # clear_deleted(fileName=main, elementDeleted=element, name=name)
         read_main_data = json.load(main_file)
 
         elements_base = open(element, "r").readlines()
         element_base = [json.loads(piece) for piece in elements_base]
 
-        # clear_deleted(fileName=element_deleted, elmenetDeleted=element, name=name)
+        # clear_deleted(fileName=element_deleted, elementDeleted=element, name=name)
 
         [read_main_data[name].append(piece) for piece in element_base]
 
         main_file.seek(0)
+        open(main, "w").close() # Supposedly to clear the main file
         json.dump(read_main_data, main_file, indent=2)

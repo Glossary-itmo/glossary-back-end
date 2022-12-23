@@ -3,7 +3,7 @@ import json
 
 
 def check_if_duplicate_key(old_data, new_data, fieldName):
-    """ Проверить если присланые ключи уже есть,
+    """ Проверить если присланные ключи уже есть,
     True - есть дубликаты в новых данных
     False - нет дубликатов в новых данных"""
 
@@ -30,7 +30,7 @@ def check_if_duplicate_src_targ(new_data, old_data, fileName):
     True - есть дубликаты новых связей
     False - нет дубликатов новых связей """
 
-    # Взять указаное "field" поле из "data" и записать в лист "x" и вернуть из lambda функции
+    # Взять указанное "field" поле из "data" и записать в лист "x" и вернуть из lambda функции
     # в переменную "extract"
     extract = lambda data, field : list(map(lambda x : x[field], data))
 

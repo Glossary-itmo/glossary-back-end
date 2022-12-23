@@ -30,7 +30,7 @@ async def get_all():
 
 @router.get('/get/unloading', status_code=201)
 async def unloading():
-    """ Удалить помеченые для удаления и обновить информацию в base.json"""
+    """ Удалить помеченные для удаления и обновить информацию в base.json"""
 
     nodes_name = "nodes"
     edges_name = "edges"
@@ -45,7 +45,7 @@ async def unloading():
     submit_to_base_file(
         element=file_name("edge"), element_deleted=file_name("edge_delete"),
         main=file_name("main"), name=edges_name)
-    return {"detail": "Cleared deleted and unloaded new submitions"}
+    return {"detail": "Cleared deleted and unloaded new submissions"}
 
 
 @router.post('/post/nodes')
@@ -97,7 +97,7 @@ async def post_edges(edges: List[EdgeBase]):
 
 @router.delete('/delete/nodes')
 async def delete_nodes(nodes: List[str]):
-    ''' Удалить один или несоколько "node(s)" '''
+    ''' Удалить один или несколько "node(s)" '''
 
     name = "nodes"
 
@@ -113,7 +113,7 @@ async def delete_nodes(nodes: List[str]):
 
 @router.delete('/delete/edges')
 async def delete_edges(edges: List[str]):
-    ''' Удалить один или несоколько "edge(s)" '''
+    ''' Удалить один или несколько "edge(s)" '''
 
     name = "edges"
 
