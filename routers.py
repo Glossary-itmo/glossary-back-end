@@ -39,7 +39,7 @@ async def unloading():
         create_file(fileName=file_name("main"))
 
     submit_to_base_file(elements=elements,
-                        element_deleted=deleted,
+                        elements_deleted=deleted,
                         main=file_name("main"),
                         names=names
                         )
