@@ -99,6 +99,7 @@ async def delete_nodes(nodes: List[str]):
         raise HTTPException(status_code=404, detail="Nodes not found")
     return delete(new_data=nodes,
                   mainFile=file_name("main"),
+                  secondaryFile=file_name("node"),
                   fieldName=name,
                   fileName=file_name("node_delete")
                   )
@@ -114,6 +115,7 @@ async def delete_edges(edges: List[str]):
         raise HTTPException(status_code=404, detail="Edges not found")
     return delete(new_data=edges,
                   mainFile=file_name("main"),
+                  secondaryFile=file_name("edge"),
                   fieldName=name,
                   fileName=file_name("edge_delete")
                   )

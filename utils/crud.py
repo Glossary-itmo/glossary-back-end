@@ -55,7 +55,6 @@ def post_data(data, write_to, mainFile, fileName, fileDeleted):
                                     detail=f"Forbidden, already exists in { file }")
 
             if write_to == "edges":
-                # Check duplicates source-target pair
                 if check_if_duplicate_src_targ(old_data=read_data,
                                                new_data=new_data,
                                                fileName=fileName) is True:
@@ -74,10 +73,11 @@ def post_data(data, write_to, mainFile, fileName, fileDeleted):
         return base_file
 
 
-def delete(new_data, mainFile, fieldName, fileName):
+def delete(new_data, mainFile, secondaryFile, fieldName, fileName):
     ''' Отметить node или edge для удаления '''
 
     ready_new_data = [{"key": key} for key in new_data]
+    main_and_secondary = [mainFile, secondaryFile]
 
     with open(fileName, "a+") as base_file:
         if check_if_duplicate_key(old_data=fileName,
@@ -85,7 +85,17 @@ def delete(new_data, mainFile, fieldName, fileName):
                                   fieldName=fieldName) is True:
             raise HTTPException(status_code=403,
                                 detail="Forbidden, already marked for deletion")
-        [base_file.write(json.dumps(i) + "\n") for i in ready_new_data]
+
+        for file in main_and_secondary:
+            print(file)
+            if check_if_duplicate_key(old_data=file,
+                                      new_data=ready_new_data,
+                                      fieldName=fieldName) is True:
+                [base_file.write(json.dumps(i) + "\n") for i in ready_new_data]
+                return
+            else:
+                raise HTTPException(status_code=404,
+                                    detail="Not found")
 
 
 def clear_deleted(fileName, elementDeleted, name):
@@ -144,8 +154,6 @@ def submit_to_base_file(elements, elements_deleted, main, names):
             # Merge the two
             merge(main=read_main_data[name], secondary=ready_secondary[name])
 
-        print(read_main_data)
         open(main, 'w').close()
         main_file.seek(0)
         json.dump(read_main_data, main_file, indent=2)
-        # print("And that's a dump! ! ! !")
