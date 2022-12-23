@@ -7,7 +7,7 @@ def check_if_duplicate_key(old_data, new_data, fieldName):
     True - есть дубликаты в новых данных
     False - нет дубликатов в новых данных"""
 
-    extract = lambda data : list(map(lambda x : x["key"], data))
+    extract = lambda data: list(map(lambda x: x["key"], data))
 
     # Check file extension
     if old_data.endswith(".txt"):
@@ -17,7 +17,7 @@ def check_if_duplicate_key(old_data, new_data, fieldName):
         old_data_temp = json.load(open(old_data, "r"))
         old_data_ready = old_data_temp[fieldName]
 
-    old_keys = extract(old_data_ready) 
+    old_keys = extract(old_data_ready)
     new_keys = extract(new_data)
     for key in new_keys:
         if key in old_keys:
@@ -32,17 +32,17 @@ def check_if_duplicate_src_targ(new_data, old_data, fileName):
 
     # Взять указанное "field" поле из "data" и записать в лист "x" и вернуть из lambda функции
     # в переменную "extract"
-    extract = lambda data, field : list(map(lambda x : x[field], data))
+    extract = lambda data, field: list(map(lambda x: x[field], data))
 
     temp_new_data = zip(
-            extract(new_data, "source"), 
-            extract(new_data, "target"))
+        extract(new_data, "source"),
+        extract(new_data, "target"))
     temp_old_data = zip(
-            extract([json.loads(i) for i in old_data], "source"), 
-            extract([json.loads(i) for i in old_data], "target"))
+        extract([json.loads(i) for i in old_data], "source"),
+        extract([json.loads(i) for i in old_data], "target"))
     temp_old_data_reverse = zip(
-            extract([json.loads(i) for i in old_data], "target"),
-            extract([json.loads(i) for i in old_data], "source")) 
+        extract([json.loads(i) for i in old_data], "target"),
+        extract([json.loads(i) for i in old_data], "source"))
 
     for data in temp_new_data:
         if data in temp_old_data or data in temp_old_data_reverse:
