@@ -20,10 +20,6 @@ def check_if_duplicate_key(old_data, new_data, fieldName):
     old_keys = extract(old_data_ready)
     new_keys = extract(new_data)
 
-    print(old_keys)
-    print("\n")
-    print(new_keys)
-
     for key in new_keys:
         if key in old_keys:
             return True
