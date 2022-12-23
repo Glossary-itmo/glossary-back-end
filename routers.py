@@ -21,7 +21,9 @@ async def get_all():
 
     if check_if_empty(file_name("main")) == True:
         return {"message": "Main file is empty or doesn't exist"}
-    return get_data(fileName=file_name("main"),
+    return get_data(names=["nodes", "edges"],
+                    fileName=file_name("main"),
+                    secondaries=[file_name("node"), file_name("edge")],
                     nodeDeleted=file_name("node_delete"),
                     edgeDeleted=file_name("edge_delete")
                     )
@@ -31,17 +33,14 @@ async def get_all():
 async def unloading():
     """ Удалить помеченные для удаления и обновить информацию в base.json"""
 
-    elements = [file_name("node"), file_name("edge")]
-    names = ["nodes", "edges"]
-    deleted = [file_name("node_delete"), file_name("edge_delete")]
-
     if check_if_empty(file_name("main")) == True:
         create_file(fileName=file_name("main"))
 
-    submit_to_base_file(elements=elements,
-                        elements_deleted=deleted,
+    submit_to_base_file(elements=[file_name("node"), file_name("edge")],
+                        elements_deleted=[
+                            file_name("node_delete"), file_name("edge_delete")],
                         main=file_name("main"),
-                        names=names
+                        names=["nodes", "edges"]
                         )
     return {"detail": "Cleared deleted and unloaded new submissions"}
 
