@@ -26,24 +26,33 @@ def check_if_duplicate_key(old_data, new_data, fieldName):
     return False
 
 
-def check_if_duplicate_src_targ(new_data, old_data, fileName):
+def check_if_duplicate_src_targ(new_data, old_data, fileName, fieldName):
     """ Проверить если присланные связи уже есть
     True - есть дубликаты новых связей
     False - нет дубликатов новых связей """
 
+    # Check file extension
+    if old_data.endswith(".txt"):
+        old_data_temp = open(old_data, "r").readlines()
+        old_data_ready = [json.loads(i) for i in old_data_temp]
+    else:
+        old_data_temp = json.load(open(old_data, "r"))
+        old_data_ready = old_data_temp[fieldName]
+
     # Взять указанное "field" поле из "data" и записать в лист "x" и вернуть из lambda функции
     # в переменную "extract"
+    # extract = lambda data, field: list(map(lambda x: x[field], data))
     extract = lambda data, field: list(map(lambda x: x[field], data))
 
     temp_new_data = zip(
         extract(new_data, "source"),
         extract(new_data, "target"))
     temp_old_data = zip(
-        extract([json.loads(i) for i in old_data], "source"),
-        extract([json.loads(i) for i in old_data], "target"))
+        extract([i for i in old_data_ready], "source"),
+        extract([i for i in old_data_ready], "target"))
     temp_old_data_reverse = zip(
-        extract([json.loads(i) for i in old_data], "target"),
-        extract([json.loads(i) for i in old_data], "source"))
+        extract([i for i in old_data_ready], "target"),
+        extract([i for i in old_data_ready], "source"))
 
     for data in temp_new_data:
         if data in temp_old_data or data in temp_old_data_reverse:

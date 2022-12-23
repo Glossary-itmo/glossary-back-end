@@ -52,14 +52,6 @@ async def post_nodes(nodes: List[NodeBase]):
 
     name = "nodes"
 
-    if check_if_empty(fileName=file_name("node")) is True:
-        create_file(fileName=file_name("node"))
-        return post_data(data=nodes,
-                         write_to=name,
-                         mainFile=file_name("main"),
-                         fileName=file_name("node"),
-                         fileDeleted=file_name("node_delete")
-                         )
     return post_data(data=nodes,
                      write_to=name,
                      mainFile=file_name("main"),
@@ -73,14 +65,6 @@ async def post_edges(edges: List[EdgeBase]):
 
     name = "edges"
 
-    if check_if_empty(fileName=file_name("edge")) is True:
-        create_file(fileName=file_name("edge"))
-        return post_data(data=edges,
-                         write_to=name,
-                         mainFile=file_name("main"),
-                         fileName=file_name("edge"),
-                         fileDeleted=file_name("edge_delete")
-                         )
     return post_data(data=edges,
                      write_to=name,
                      mainFile=file_name("main"),
@@ -96,7 +80,7 @@ async def delete_nodes(nodes: List[str]):
     name = "nodes"
 
     if check_if_empty(fileName=file_name("node_delete")) is True:
-        raise HTTPException(status_code=404, detail="Nodes not found")
+        create_file(file_name("node_delete"))
     return delete(new_data=nodes,
                   mainFile=file_name("main"),
                   secondaryFile=file_name("node"),
@@ -112,7 +96,7 @@ async def delete_edges(edges: List[str]):
     name = "edges"
 
     if check_if_empty(fileName=file_name("edge_delete")) is True:
-        raise HTTPException(status_code=404, detail="Edges not found")
+        create_file(file_name("edge_delete"))
     return delete(new_data=edges,
                   mainFile=file_name("main"),
                   secondaryFile=file_name("edge"),

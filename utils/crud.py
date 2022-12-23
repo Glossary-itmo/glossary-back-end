@@ -31,10 +31,13 @@ def get_data(fileName, nodeDeleted, edgeDeleted):
 def create_file(fileName):
     """ В случае если нет файла json или он пустой создать json и его базовые составляющие"""
 
-    with open(fileName, "w+") as base_file:
-        # Взять ResultBase и конвертировать её в json и записать в файл
-        base = json.loads(ResultBase().json())
-        json.dump(base, base_file, indent=2)
+    if fileName == file_name("main"):
+        with open(fileName, "w+") as base_file:
+            # Взять ResultBase и конвертировать её в json и записать в файл
+            base = json.loads(ResultBase().json())
+            json.dump(base, base_file, indent=2)
+    else:
+        open(fileName, "w").close()
 
 
 def post_data(data, write_to, mainFile, fileName, fileDeleted):
@@ -47,29 +50,24 @@ def post_data(data, write_to, mainFile, fileName, fileDeleted):
 
         files_to_check = [mainFile, fileName, fileDeleted]
         for file in files_to_check:
+            if check_if_empty(file) is True:
+                create_file(file)
             if check_if_duplicate_key(old_data=file,
                                       new_data=new_data,
-                                      fieldName=write_to)\
-                    is True:
+                                      fieldName=write_to) is True:
                 raise HTTPException(status_code=403,
                                     detail=f"Forbidden, already exists in { file }")
 
             if write_to == "edges":
-                if check_if_duplicate_src_targ(old_data=read_data,
+                if check_if_duplicate_src_targ(old_data=file,
                                                new_data=new_data,
-                                               fileName=fileName) is True:
+                                               fileName=fileName,
+                                               fieldName=write_to) is True:
                     raise HTTPException(status_code=403,
                                         detail="Forbidden, this direction already exists")
 
-        for i, ready_data in enumerate(new_data):
-            if len(new_data) == 1:
-                base_file.write("\n" + json.dumps(ready_data))
-            elif (len(new_data) - 1) == i:
-                base_file.write(json.dumps(ready_data))
-            elif i == 0:
-                base_file.write("\n" + json.dumps(ready_data) + "\n")
-            else:
-                base_file.write(json.dumps(ready_data) + "\n")
+        [base_file.write(json.dumps(ready_data) + "\n") 
+        for i, ready_data in enumerate(new_data)]
         return base_file
 
 
@@ -141,6 +139,7 @@ def submit_to_base_file(elements, elements_deleted, main, names):
 
         for i, name in enumerate(names):
             # Clear main
+            # if check_if_empty(main) is True: return
             read_main_data[name].clear()
             read_main_data[name] = clear_deleted(fileName=main,
                                                  elementDeleted=elements_deleted[i],
@@ -157,3 +156,4 @@ def submit_to_base_file(elements, elements_deleted, main, names):
         open(main, 'w').close()
         main_file.seek(0)
         json.dump(read_main_data, main_file, indent=2)
+        [open(element, 'w').close() for element in elements]
