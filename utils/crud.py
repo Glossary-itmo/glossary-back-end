@@ -12,6 +12,7 @@ from utils.checks import (
 
 def get_data(fileName, nodeDeleted, edgeDeleted):
     ''' Получить все что есть в главном файле за исключением помеченного на удаление '''
+
     node_name = "nodes"
     edge_name = "edges"
 
@@ -33,16 +34,14 @@ def create_file(fileName):
     """ В случае если нет файла json или он пустой создать json и его базовые состовляющие"""
 
     with open(fileName, "w+") as base_file:
-        # Взять ResultBase и конвертировать её в json
+        # Взять ResultBase и конвертировать её в json и записать в файл
         base = json.loads(ResultBase().json())
-
-        # Записать ResultBase в base_file
         json.dump(base, base_file, indent=2)
-        # return base_file
 
 
 def post_data(data, write_to, mainFile, fileName, fileDeleted):
     ''' Если файл создан и в нем есть элементы то добавить в существующий файл '''
+
     with open(fileName, 'a+') as base_file:
         base_file.seek(0)
         read_data = base_file.readlines()
@@ -102,6 +101,7 @@ def delete(new_data, mainFile, fieldName, fileName):
 
 def clear_deleted(fileName, elmenetDeleted, name):
     ''' Очистить файлы помеченные для удаления из главного файла'''
+    
     # print(fileName)
     if check_if_empty(fileName=fileName) is True:
         return {'message': 'No data'}
