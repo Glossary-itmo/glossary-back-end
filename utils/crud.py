@@ -66,8 +66,8 @@ def post_data(data, write_to, mainFile, fileName, fileDeleted):
                     raise HTTPException(status_code=403,
                                         detail="Forbidden, this direction already exists")
 
-        [base_file.write(json.dumps(ready_data) + "\n") 
-        for i, ready_data in enumerate(new_data)]
+        [base_file.write(json.dumps(ready_data) + "\n")
+         for i, ready_data in enumerate(new_data)]
         return base_file
 
 
