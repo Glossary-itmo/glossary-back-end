@@ -99,9 +99,8 @@ def clear_deleted(fileName, elementDeleted, name):
                                          if element["key"] not in deleted]
 
     # Execution
-
     if check_if_empty(fileName=fileName) is True:
-        return {'message': 'No data'}
+        return {}
 
     # Check file extension
     if fileName.endswith(".txt"):
@@ -125,6 +124,9 @@ def submit_to_base_file(elements, elements_deleted, main, names):
     with open(main, "r+") as main_file:
         read_main_data = json.load(main_file)
 
+        merge = lambda main, secondary: [
+            main.append(i) for i in secondary]
+
         ready_secondary = json.loads(ResultBase().json())
 
         for i, name in enumerate(names):
@@ -139,6 +141,11 @@ def submit_to_base_file(elements, elements_deleted, main, names):
                                                   elementDeleted=elements_deleted[i],
                                                   name=name).copy()
 
-        # main_file.seek(0)
-        # json.dump(read_main_data, main_file, indent=2)
-        print("And that's a dump! ! ! !")
+            # Merge the two
+            merge(main=read_main_data[name], secondary=ready_secondary[name])
+
+        print(read_main_data)
+        open(main, 'w').close()
+        main_file.seek(0)
+        json.dump(read_main_data, main_file, indent=2)
+        # print("And that's a dump! ! ! !")
