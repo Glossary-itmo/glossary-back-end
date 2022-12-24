@@ -15,12 +15,11 @@ def get_data(names, fileName, secondaries, secondaryDeleted):
 
     with open(fileName, "r+") as base_data:
         read_file = json.load(base_data)
-        read_file[names[0]] = clear_deleted(fileName=fileName,
-                                             elementDeleted=secondaryDeleted[0],
-                                             name=names[0]).copy()
-        read_file[names[1]] = clear_deleted(fileName=fileName,
-                                             elementDeleted=secondaryDeleted[1],
-                                             name=names[1]).copy()
+
+        for i, name in enumerate(names):
+            read_file[name] = clear_deleted(fileName=fileName,
+                                            elementDeleted=secondaryDeleted[i],
+                                            name=names[i]).copy()
 
         for i, file in enumerate(secondaries):
             pass
@@ -44,8 +43,6 @@ def post_data(data, write_to, mainFile, fileName, fileDeleted):
     ''' Если файл создан и в нем есть элементы то добавить в существующий файл '''
 
     with open(fileName, 'a+') as base_file:
-        base_file.seek(0)
-        read_data = base_file.readlines()
         new_data = [i.dict() for i in data]
 
         files_to_check = [mainFile, fileName, fileDeleted]
@@ -54,7 +51,8 @@ def post_data(data, write_to, mainFile, fileName, fileDeleted):
                 create_file(file)
             if check_if_duplicate_key(old_data=file,
                                       new_data=new_data,
-                                      fieldName=write_to) is True:
+                                      fieldName=write_to) \
+                    is True:
                 raise HTTPException(status_code=403,
                                     detail=f"Forbidden, already exists in { file }")
 
@@ -85,7 +83,6 @@ def delete(new_data, mainFile, secondaryFile, fieldName, fileName):
                                 detail="Forbidden, already marked for deletion")
 
         for file in main_and_secondary:
-            print(file)
             if check_if_duplicate_key(old_data=file,
                                       new_data=ready_new_data,
                                       fieldName=fieldName) is True:
@@ -105,8 +102,8 @@ def clear_deleted(fileName, elementDeleted, name):
     get_results = lambda data, deleted: [element for i, element
                                          in enumerate(data)
                                          if element["key"] not in deleted]
+    # End of lambdas
 
-    # Execution
     if check_if_empty(fileName=fileName) is True:
         return {}
 
@@ -132,14 +129,13 @@ def submit_to_base_file(elements, elements_deleted, main, names):
     with open(main, "r+") as main_file:
         read_main_data = json.load(main_file)
 
-        merge = lambda main, secondary: [
-            main.append(i) for i in secondary]
+        merge = lambda main, secondary: \
+            [main.append(i) for i in secondary]
 
         ready_secondary = json.loads(ResultBase().json())
 
         for i, name in enumerate(names):
             # Clear main
-            # if check_if_empty(main) is True: return
             read_main_data[name].clear()
             read_main_data[name] = clear_deleted(fileName=main,
                                                  elementDeleted=elements_deleted[i],
@@ -153,6 +149,7 @@ def submit_to_base_file(elements, elements_deleted, main, names):
             # Merge the two
             merge(main=read_main_data[name], secondary=ready_secondary[name])
 
+        # Clear main file, dump everything into it and clear secondary files
         open(main, 'w').close()
         main_file.seek(0)
         json.dump(read_main_data, main_file, indent=2)
