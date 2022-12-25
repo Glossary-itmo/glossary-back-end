@@ -56,6 +56,9 @@ def post_data(data, write_to, mainFile, fileName, fileDeleted):
                 raise HTTPException(status_code=403,
                                     detail=f"Forbidden, already exists in { file }")
 
+            if file == fileDeleted:
+                break
+            
             if write_to == "edges":
                 if check_if_duplicate_src_targ(old_data=file,
                                                new_data=new_data,
@@ -64,8 +67,8 @@ def post_data(data, write_to, mainFile, fileName, fileDeleted):
                     raise HTTPException(status_code=403,
                                         detail="Forbidden, this direction already exists")
 
-        [base_file.write(json.dumps(ready_data) + "\n")
-         for i, ready_data in enumerate(new_data)]
+        # [base_file.write(json.dumps(ready_data) + "\n")
+        #  for i, ready_data in enumerate(new_data)]
         return base_file
 
 
@@ -92,7 +95,7 @@ def delete(new_data, mainFile, secondaryFile, fieldName, fileName):
                 raise HTTPException(status_code=404,
                                     detail="Not found")
 
-
+    
 def clear_deleted(fileName, elementDeleted, name):
     ''' Очистить файлы помеченные для удаления из главного файла'''
 
