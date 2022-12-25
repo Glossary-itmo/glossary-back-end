@@ -41,7 +41,6 @@ def check_if_duplicate_src_targ(new_data, old_data, fileName, fieldName):
 
     # Взять указанное "field" поле из "data" и записать в лист "x" и вернуть из lambda функции
     # в переменную "extract"
-    # extract = lambda data, field: list(map(lambda x: x[field], data))
     extract = lambda data, field: list(map(lambda x: x[field], data))
 
     temp_new_data = zip(
