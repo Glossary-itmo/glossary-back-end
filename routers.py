@@ -11,11 +11,19 @@ from utils.checks import (
 )
 from schemas import ResultBase, NodeBase, EdgeBase
 
+from enum import Enum
 
-router = APIRouter()
+
+router = APIRouter(
+    prefix="/glossary",
+)
 
 
-@router.get('/get/all', response_model=ResultBase)
+class Tags(Enum):
+    glossary = 'Glossary'
+
+
+@router.get('/get/all', response_model=ResultBase, tags=[Tags.glossary])
 async def get_all():
     """ Вывести все содержимое base.json за исключением элементов помеченных на удаление"""
 
@@ -28,7 +36,7 @@ async def get_all():
                     )
 
 
-@router.get('/get/unloading', status_code=201)
+@router.get('/get/unloading', status_code=201, tags=[Tags.glossary])
 async def unloading():
     """ Удалить помеченные для удаления и обновить информацию в base.json"""
 
@@ -44,7 +52,7 @@ async def unloading():
     return {"detail": "Cleared deleted and unloaded new submissions"}
 
 
-@router.post('/post/nodes', status_code=201)
+@router.post('/post/nodes', status_code=201, tags=[Tags.glossary])
 async def post_nodes(nodes: List[NodeBase]):
     ''' Добавить один или несколько "node(s)" '''
 
@@ -57,7 +65,7 @@ async def post_nodes(nodes: List[NodeBase]):
                      fileDeleted=file_name("node_delete"))
 
 
-@router.post('/post/edges', status_code=201)
+@router.post('/post/edges', status_code=201, tags=[Tags.glossary])
 async def post_edges(edges: List[EdgeBase]):
     ''' Добавить один или несколько "edge(s)" '''
 
@@ -71,7 +79,7 @@ async def post_edges(edges: List[EdgeBase]):
                      )
 
 
-@router.delete('/delete/nodes', status_code=204)
+@router.delete('/delete/nodes', status_code=204, tags=[Tags.glossary])
 async def delete_nodes(nodes: List[str]):
     ''' Удалить один или несколько "node(s)" '''
 
@@ -87,7 +95,7 @@ async def delete_nodes(nodes: List[str]):
                   )
 
 
-@router.delete('/delete/edges', status_code=204)
+@router.delete('/delete/edges', status_code=204, tags=[Tags.glossary])
 async def delete_edges(edges: List[str]):
     ''' Удалить один или несколько "edge(s)" '''
 
