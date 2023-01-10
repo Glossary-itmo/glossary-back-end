@@ -8,21 +8,25 @@ from utils.checks import (
     check_if_duplicate_key, check_if_duplicate_src_targ,
     check_if_empty
 )
+from utils.misc import clear_deleted
 
 
 def get_data(names, fileName, secondaries, secondaryDeleted):
     ''' Получить все что есть в главном файле за исключением помеченного на удаление '''
+    
+    read_and_turn_to_json = lambda fileName : [json.loads(i) for i in open(fileName, "r").readlines()]
 
     with open(fileName, "r+") as base_data:
         read_file = json.load(base_data)
-
+        
+        
         for i, name in enumerate(names):
+            new_data = read_and_turn_to_json(secondaries[i])
             read_file[name] = clear_deleted(fileName=fileName,
                                             elementDeleted=secondaryDeleted[i],
                                             name=names[i]).copy()
 
-        for i, file in enumerate(secondaries):
-            pass
+            [read_file[name].append(i) for i in new_data]
 
         return read_file
 
@@ -45,6 +49,7 @@ def post_data(data, write_to, mainFile, fileName, fileDeleted):
     with open(fileName, 'a+') as base_file:
         new_data = [i.dict() for i in data]
 
+        nodes = [file_name("main"), file_name("node")]
         files_to_check = [mainFile, fileName, fileDeleted]
         for file in files_to_check:
             if check_if_empty(file) is True:
@@ -58,17 +63,25 @@ def post_data(data, write_to, mainFile, fileName, fileDeleted):
 
             if file == fileDeleted:
                 break
-            
+
             if write_to == "edges":
                 if check_if_duplicate_src_targ(old_data=file,
                                                new_data=new_data,
                                                fileName=fileName,
-                                               fieldName=write_to) is True:
+                                               fieldName=write_to,
+                                               nodes=nodes) is True:
                     raise HTTPException(status_code=403,
                                         detail="Forbidden, this direction already exists")
+                elif check_if_duplicate_src_targ(old_data=file,
+                                                 new_data=new_data,
+                                                 fileName=fileName,
+                                                 fieldName=write_to,
+                                                 nodes=nodes) == 2:
+                    raise HTTPException(status_code=404,
+                                        detail="No corresponding node is found")
 
-        # [base_file.write(json.dumps(ready_data) + "\n")
-        #  for i, ready_data in enumerate(new_data)]
+        [base_file.write(json.dumps(ready_data) + "\n")
+         for i, ready_data in enumerate(new_data)]
         return base_file
 
 
@@ -94,36 +107,6 @@ def delete(new_data, mainFile, secondaryFile, fieldName, fileName):
             else:
                 raise HTTPException(status_code=404,
                                     detail="Not found")
-
-    
-def clear_deleted(fileName, elementDeleted, name):
-    ''' Очистить файлы помеченные для удаления из главного файла'''
-
-    # Lambdas
-    turn_to_json = lambda data: [json.loads(i) for i in data]
-    get_deleted_keys = lambda data: [i["key"] for i in data]
-    get_results = lambda data, deleted: [element for i, element
-                                         in enumerate(data)
-                                         if element["key"] not in deleted]
-    # End of lambdas
-
-    if check_if_empty(fileName=fileName) is True:
-        return {}
-
-    # Check file extension
-    if fileName.endswith(".txt"):
-        file_name_temp = open(fileName, "r").readlines()
-        file_name_ready = [json.loads(i) for i in file_name_temp]
-    else:
-        file_name_temp = json.load(open(fileName, "r"))
-        file_name_ready = file_name_temp[name]
-
-    element_deleted = open(elementDeleted).readlines()
-    element_deleted = turn_to_json(element_deleted)
-    element_deleted_keys = get_deleted_keys(element_deleted)
-
-    return get_results(data=file_name_ready,
-                       deleted=element_deleted_keys)
 
 
 def submit_to_base_file(elements, elements_deleted, main, names):
