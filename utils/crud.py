@@ -8,7 +8,7 @@ from utils.checks import (
     check_if_duplicate_key, check_if_duplicate_src_targ,
     check_if_empty
 )
-from utils.misc import clear_deleted
+from utils.misc import clear_deleted, cascade_delete
 
 
 def get_data(names, fileName, secondaries, secondaryDeleted):
@@ -102,7 +102,16 @@ def delete(new_data, mainFile, secondaryFile, fieldName, fileName):
             if check_if_duplicate_key(old_data=file,
                                       new_data=ready_new_data,
                                       fieldName=fieldName) is True:
+                # Записать данные в файл и закончить выполнение функции
                 [base_file.write(json.dumps(i) + "\n") for i in ready_new_data]
+                if secondaryFile == file_name("node"):
+                    cascade_delete(
+                        new_data=ready_new_data,
+                        old_data=get_data(
+                            names=["nodes", "edges"], 
+                            fileName=mainFile, 
+                            secondaries=[file_name("node"), file_name("edge")], 
+                            secondaryDeleted=[file_name("node_delete"), file_name("edge_delete")]))
                 return
             else:
                 raise HTTPException(status_code=404,

@@ -1,5 +1,6 @@
 import json
-from utils.checks import check_if_empty
+from file_names import file_name
+from utils.checks import check_if_txt, check_if_empty, extract_new_old
 
 
 def clear_deleted(fileName, elementDeleted, name):
@@ -29,3 +30,23 @@ def clear_deleted(fileName, elementDeleted, name):
 
     return get_results(data=file_name_ready,
                        deleted=element_deleted_keys)
+
+
+def cascade_delete(new_data, old_data):
+    ''' Каскадное удаление edge при удалении node '''
+
+    extract = lambda data, field: list(map(lambda x: x[field], data))
+
+    ready_new_data = [i['key'] for i in new_data]
+    temp_old_keys = list(
+        extract([i for i in old_data["edges"]], "key"))
+    temp_old_data = list(zip(
+        extract([i for i in old_data["edges"]], "source"),
+        extract([i for i in old_data["edges"]], "target")))
+
+    with open(file_name("edge_delete"), "a+") as base_file:
+        for i, data in enumerate(temp_old_data):
+            [base_file.write(json.dumps({"key": temp_old_keys[i]}) + "\n") 
+            for j, _ in enumerate(ready_new_data)
+            if ready_new_data[j] in data]
+    return
