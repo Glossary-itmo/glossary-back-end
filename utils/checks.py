@@ -65,7 +65,6 @@ def check_if_duplicate_src_targ(new_data, old_data, fileName, fieldName, nodes):
             extract([i for i in check_if_txt(fileName=name, fieldName=fieldName)], "key"))
 
     for data in temp_new_data:
-        print(data)
         if data in temp_old_data or data in temp_old_data_reverse:
             return True
         if data[0] not in temp_old_node_keys or data[1] not in temp_old_node_keys:
