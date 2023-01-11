@@ -15,6 +15,21 @@ def check_if_txt(fileName, fieldName):
         return old_data_temp[fieldName]
 
 
+def extract_new_old(new_data, old_data, fieldName):
+    extract = lambda data, field: list(map(lambda x: x[field], data))
+
+    temp_new_data = list(zip(
+        extract(new_data, "source"),
+        extract(new_data, "target")))
+    temp_old_data = list(zip(
+        extract([i for i in check_if_txt(fileName=old_data, fieldName=fieldName)], "source"),
+        extract([i for i in check_if_txt(fileName=old_data, fieldName=fieldName)], "target")))
+    temp_old_data_reverse = list(zip(
+        extract([i for i in check_if_txt(fileName=old_data, fieldName=fieldName)], "target"),
+        extract([i for i in check_if_txt(fileName=old_data, fieldName=fieldName)], "source")))
+    return temp_new_data, temp_old_data, temp_old_data_reverse
+
+
 def check_if_duplicate_key(old_data, new_data, fieldName):
     """ Проверить если присланные ключи уже есть,
     True - есть дубликаты в новых данных
@@ -41,16 +56,8 @@ def check_if_duplicate_src_targ(new_data, old_data, fileName, fieldName, nodes):
     # в переменную "extract"
     extract = lambda data, field: list(map(lambda x: x[field], data))
 
-    temp_new_data = list(zip(
-        extract(new_data, "source"),
-        extract(new_data, "target")))
-    temp_old_data = list(zip(
-        extract([i for i in check_if_txt(fileName=old_data, fieldName=fieldName)], "source"),
-        extract([i for i in check_if_txt(fileName=old_data, fieldName=fieldName)], "target")))
-    temp_old_data_reverse = list(zip(
-        extract([i for i in check_if_txt(fileName=old_data, fieldName=fieldName)], "target"),
-        extract([i for i in check_if_txt(fileName=old_data, fieldName=fieldName)], "source")))
-
+    temp_new_data, temp_old_data, temp_old_data_reverse = extract_new_old(
+        new_data=new_data, old_data=old_data, fieldName=fieldName)
 
     temp_old_node_keys = []
     for name in nodes:
