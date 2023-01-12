@@ -1,4 +1,5 @@
 import json
+import uuid
 from fastapi import HTTPException
 from schemas import ResultBase
 
@@ -46,6 +47,9 @@ def create_file(fileName):
 def post_data(data, write_to, mainFile, fileName, fileDeleted):
     ''' Если файл создан и в нем есть элементы то добавить в существующий файл '''
 
+    ### Подменить значение key на uuid
+    key_to_uuid = lambda data : [key.update({"key": uuid.uuid4().hex}) for key in data]
+
     with open(fileName, 'a+') as base_file:
         new_data = [i.dict() for i in data]
 
@@ -79,6 +83,8 @@ def post_data(data, write_to, mainFile, fileName, fileDeleted):
                                                  nodes=nodes) == 2:
                     raise HTTPException(status_code=404,
                                         detail="No corresponding node is found")
+
+        key_to_uuid(data=new_data)
 
         [base_file.write(json.dumps(ready_data) + "\n")
          for i, ready_data in enumerate(new_data)]
