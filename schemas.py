@@ -12,6 +12,7 @@ class AttributesBase(BaseModel):
 
 class AttributesNode(AttributesBase):
     label: str
+    text: Union[str, None] = None
     
 
 class AttributesEdge(AttributesBase):

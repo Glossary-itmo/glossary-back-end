@@ -14,14 +14,14 @@ from utils.misc import clear_deleted, cascade_delete
 def get_data(names, fileName, secondaries, secondaryDeleted):
     ''' Получить все что есть в главном файле за исключением помеченного на удаление '''
     
-    read_and_turn_to_json = lambda fileName : [json.loads(i) for i in open(fileName, "r").readlines()]
+    read_and_turn_to_json = lambda to_read : [json.loads(i) for i in open(to_read, "r").readlines()]
 
     with open(fileName, "r+") as base_data:
         read_file = json.load(base_data)
         
         
         for i, name in enumerate(names):
-            new_data = read_and_turn_to_json(secondaries[i])
+            new_data = read_and_turn_to_json(to_read=secondaries[i])
             read_file[name] = clear_deleted(fileName=fileName,
                                             elementDeleted=secondaryDeleted[i],
                                             name=names[i]).copy()
