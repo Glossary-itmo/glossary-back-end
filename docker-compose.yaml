@@ -1,0 +1,19 @@
+version: "3.3"
+services:
+  backend:
+    build: 
+      context: .
+      dockerfile: back.Dockerfile
+    command: bash -c "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    restart: always
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/code
+  frontend:
+    build:
+      context: ../graph-glossary-front/
+      dockerfile: ../graph-glossary-front/front.Dockerfile
+    command: bash -c "npm run serve"
+    ports:
+      - 8080:8080
