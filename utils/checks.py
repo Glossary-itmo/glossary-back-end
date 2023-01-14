@@ -2,7 +2,7 @@ import os
 import json
 
 
-def check_if_txt(fileName, fieldName):
+def check_if_txt_and_return(fileName, fieldName):
     ''' Проверить если fileName имеет расширение .txt,
     загрузить соответствующим образом данные и вернуть их '''
 
@@ -22,11 +22,11 @@ def extract_new_old(new_data, old_data, fieldName):
         extract(new_data, "source"),
         extract(new_data, "target")))
     temp_old_data = list(zip(
-        extract([i for i in check_if_txt(fileName=old_data, fieldName=fieldName)], "source"),
-        extract([i for i in check_if_txt(fileName=old_data, fieldName=fieldName)], "target")))
+        extract([i for i in check_if_txt_and_return(fileName=old_data, fieldName=fieldName)], "source"),
+        extract([i for i in check_if_txt_and_return(fileName=old_data, fieldName=fieldName)], "target")))
     temp_old_data_reverse = list(zip(
-        extract([i for i in check_if_txt(fileName=old_data, fieldName=fieldName)], "target"),
-        extract([i for i in check_if_txt(fileName=old_data, fieldName=fieldName)], "source")))
+        extract([i for i in check_if_txt_and_return(fileName=old_data, fieldName=fieldName)], "target"),
+        extract([i for i in check_if_txt_and_return(fileName=old_data, fieldName=fieldName)], "source")))
     return temp_new_data, temp_old_data, temp_old_data_reverse
 
 
@@ -37,7 +37,7 @@ def check_if_duplicate_key(old_data, new_data, fieldName):
 
     extract = lambda data: list(map(lambda x: x["key"], data))
 
-    old_keys = extract(check_if_txt(fileName=old_data, fieldName=fieldName))
+    old_keys = extract(check_if_txt_and_return(fileName=old_data, fieldName=fieldName))
     new_keys = extract(new_data)
 
     for key in new_keys:
@@ -62,7 +62,10 @@ def check_if_duplicate_src_targ(new_data, old_data, fileName, fieldName, nodes):
     temp_old_node_keys = []
     for name in nodes:
         temp_old_node_keys += list(
-            extract([i for i in check_if_txt(fileName=name, fieldName=fieldName)], "key"))
+            extract([i for i in check_if_txt_and_return(fileName=name, fieldName="nodes")], "key"))
+    
+    print("New data", temp_new_data)
+    print("Old data", temp_old_node_keys)
 
     for data in temp_new_data:
         if data in temp_old_data or data in temp_old_data_reverse:

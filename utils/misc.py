@@ -1,6 +1,6 @@
 import json
 from file_names import file_name
-from utils.checks import check_if_txt, check_if_empty, extract_new_old
+from utils.checks import check_if_txt_and_return, check_if_empty, extract_new_old
 
 
 def clear_deleted(fileName, elementDeleted, name):
