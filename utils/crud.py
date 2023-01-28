@@ -86,9 +86,13 @@ def post_data(data, write_to, mainFile, fileName, fileDeleted):
 
         key_to_uuid(data=new_data)
 
-        [base_file.write(json.dumps(ready_data) + "\n")
+        [base_file.write(json.dumps(ready_data, ensure_ascii=False) + "\n")
          for i, ready_data in enumerate(new_data)]
         return base_file
+
+
+def edit_data(data, write_to, mainFile, fileName, fileDeleted):
+    pass
 
 
 def delete(new_data, mainFile, secondaryFile, fieldName, fileName):
