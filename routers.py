@@ -3,7 +3,7 @@ from typing import List
 
 from file_names import file_name
 from utils.crud import (
-    get_data, create_file, post_data, delete, submit_to_base_file
+    get_data, create_file, post_data, edit_data, delete, submit_to_base_file
 )
 from utils.checks import (
     check_if_duplicate_key, check_if_duplicate_src_targ,
@@ -72,6 +72,34 @@ async def post_edges(edges: List[EdgeBase]):
     name = "edges"
 
     return post_data(data=edges,
+                     write_to=name,
+                     mainFile=file_name("main"),
+                     fileName=file_name("edge"),
+                     fileDeleted=file_name("edge_delete")
+                     )
+
+
+@router.put('/edit/nodes', status_code=201, tags=[Tags.glossary])
+async def edit_nodes(nodes: List[NodeBase]):
+    ''' Изменить один или несколько "node(s)" '''
+
+    name = "nodes"
+
+    return edit_data(data=nodes,
+                     write_to=name,
+                     mainFile=file_name("main"),
+                     fileName=file_name("node"),
+                     fileDeleted=file_name("node_delete")
+                     )
+
+
+@router.put('/edit/edges', status_code=201, tags=[Tags.glossary])
+async def edit_edges(edges: List[EdgeBase]):
+    ''' Изменить один или несколько "edge(s)" '''
+
+    name = "edges"
+
+    return edit_data(data=edges,
                      write_to=name,
                      mainFile=file_name("main"),
                      fileName=file_name("edge"),
