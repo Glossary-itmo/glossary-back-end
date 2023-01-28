@@ -157,5 +157,5 @@ def submit_to_base_file(elements, elements_deleted, main, names):
         # Clear main file, dump everything into it and clear secondary files
         open(main, 'w').close()
         main_file.seek(0)
-        json.dump(read_main_data, main_file, indent=2)
+        json.dump(read_main_data, main_file, ensure_ascii=False, indent=2)
         [open(element, 'w').close() for element in elements]
