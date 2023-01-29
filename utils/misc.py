@@ -1,6 +1,13 @@
 import json
-from file_names import file_name
 from utils.checks import check_if_txt_and_return, check_if_empty, extract_new_old
+
+
+class FileNames:
+    mainFileName = "static/data.json"
+    nodeFileName = "static/node_data.txt"
+    deletedNodeFileName = "static/node_deleted.txt"
+    edgeFileName = "static/edge_data.txt"
+    deletedEdgeFileName = "static/edge_deleted.txt"
 
 
 def clear_deleted(fileName, elementDeleted, name):
@@ -44,7 +51,7 @@ def cascade_delete(new_data, old_data):
         extract([i for i in old_data["edges"]], "source"),
         extract([i for i in old_data["edges"]], "target")))
 
-    with open(file_name("edge_delete"), "a+") as base_file:
+    with open(FileNames.deletedEdgeFileName, "a+") as base_file:
         for i, data in enumerate(temp_old_data):
             [base_file.write(json.dumps({"key": temp_old_keys[i]}) + "\n") 
             for j, _ in enumerate(ready_new_data)

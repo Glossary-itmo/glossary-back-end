@@ -1,14 +1,12 @@
 from fastapi import APIRouter, HTTPException
 from typing import List
 
-from file_names import file_name
+from utils.misc import FileNames
 from utils.crud import (
-    get_data, create_file, post_data, edit_data, delete, submit_to_base_file
+    get_data, create_file, submit_to_base_file, 
+    post_data, edit_data, delete
 )
-from utils.checks import (
-    check_if_duplicate_key, check_if_duplicate_src_targ,
-    check_if_empty
-)
+from utils.checks import check_if_empty
 from schemas import ResultBase, NodeBase, EdgeBase
 
 from enum import Enum
@@ -27,12 +25,12 @@ class Tags(Enum):
 async def get_all():
     """ Вывести все содержимое base.json за исключением элементов помеченных на удаление"""
 
-    if check_if_empty(file_name("main")) == True:
+    if check_if_empty(FileNames.mainFileName) == True:
         return {"message": "Main file is empty or doesn't exist"}
     return get_data(names=["nodes", "edges"],
-                    fileName=file_name("main"),
-                    secondaries=[file_name("node"), file_name("edge")],
-                    secondaryDeleted=[file_name("node_delete"), file_name("edge_delete")]
+                    fileName=FileNames.mainFileName,
+                    secondaries=[FileNames.nodeFileName, FileNames.edgeFileName],
+                    secondaryDeleted=[FileNames.deletedNodeFileName, FileNames.deletedEdgeFileName]
                     )
 
 
@@ -40,13 +38,13 @@ async def get_all():
 async def unloading():
     """ Удалить помеченное для удаления и обновить информацию в base.json"""
 
-    if check_if_empty(file_name("main")) == True:
-        create_file(fileName=file_name("main"))
+    if check_if_empty(FileNames.mainFileName) == True:
+        create_file(FileNames.mainFileName)
 
-    submit_to_base_file(elements=[file_name("node"), file_name("edge")],
+    submit_to_base_file(elements=[FileNames.nodeFileName, FileNames.edgeFileName],
                         elements_deleted=[
-                            file_name("node_delete"), file_name("edge_delete")],
-                        main=file_name("main"),
+                            FileNames.deletedNodeFileName, FileNames.deletedEdgeFileName],
+                        main=FileNames.mainFileName,
                         names=["nodes", "edges"]
                         )
     return {"detail": "Cleared deleted and unloaded new submissions"}
@@ -60,9 +58,9 @@ async def post_nodes(nodes: List[NodeBase]):
 
     return post_data(data=nodes,
                      write_to=name,
-                     mainFile=file_name("main"),
-                     fileName=file_name("node"),
-                     fileDeleted=file_name("node_delete"))
+                     mainFile=FileNames.mainFileName,
+                     fileName=FileNames.nodeFileName,
+                     fileDeleted=FileNames.deletedNodeFileName)
 
 
 @router.post('/post/edges', status_code=201, tags=[Tags.glossary])
@@ -73,9 +71,9 @@ async def post_edges(edges: List[EdgeBase]):
 
     return post_data(data=edges,
                      write_to=name,
-                     mainFile=file_name("main"),
-                     fileName=file_name("edge"),
-                     fileDeleted=file_name("edge_delete")
+                     mainFile=FileNames.mainFileName,
+                     fileName=FileNames.edgeFileName,
+                     fileDeleted=FileNames.deletedEdgeFileName
                      )
 
 
@@ -87,9 +85,9 @@ async def edit_nodes(nodes: List[NodeBase]):
 
     return edit_data(new_data=nodes,
                      fieldName=name,
-                     mainFile=file_name("main"),
-                     secondaryFile=file_name("node"),
-                     fileDeleted=file_name("node_delete")
+                     mainFile=FileNames.mainFileName,
+                     secondaryFile=FileNames.nodeFileName,
+                     fileDeleted=FileNames.deletedNodeFileName
                      )
 
 
@@ -101,9 +99,9 @@ async def edit_nodes(nodes: List[NodeBase]):
 
 #     return edit_data(data=edges,
 #                      write_to=name,
-#                      mainFile=file_name("main"),
-#                      fileName=file_name("edge"),
-#                      fileDeleted=file_name("edge_delete")
+#                      mainFile=FileNames.mainFileName,
+#                      fileName=FileNames.edgeFileName,
+#                      fileDeleted=FileNames.deletedEdgeFileName
 #                      )
 
 
@@ -113,13 +111,13 @@ async def delete_nodes(nodes: List[str]):
 
     name = "nodes"
 
-    if check_if_empty(fileName=file_name("node_delete")) is True:
-        create_file(file_name("node_delete"))
+    if check_if_empty(fileName=FileNames.deletedNodeFileName) is True:
+        create_file(FileNames.deletedNodeFileName)
     return delete(new_data=nodes,
-                  mainFile=file_name("main"),
-                  secondaryFile=file_name("node"),
+                  mainFile=FileNames.mainFileName,
+                  secondaryFile=FileNames.nodeFileName,
                   fieldName=name,
-                  fileName=file_name("node_delete")
+                  fileName=FileNames.deletedNodeFileName
                   )
 
 
@@ -129,11 +127,11 @@ async def delete_edges(edges: List[str]):
 
     name = "edges"
 
-    if check_if_empty(fileName=file_name("edge_delete")) is True:
-        create_file(file_name("edge_delete"))
+    if check_if_empty(fileName=FileNames.deletedEdgeFileName) is True:
+        create_file(FileNames.deletedEdgeFileName)
     return delete(new_data=edges,
-                  mainFile=file_name("main"),
-                  secondaryFile=file_name("edge"),
+                  mainFile=FileNames.mainFileName,
+                  secondaryFile=FileNames.edgeFileName,
                   fieldName=name,
-                  fileName=file_name("edge_delete")
+                  fileName=FileNames.deletedEdgeFileName
                   )
