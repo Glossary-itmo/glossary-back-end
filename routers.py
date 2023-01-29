@@ -38,7 +38,7 @@ async def get_all():
 
 @router.get('/get/unloading', status_code=201, tags=[Tags.glossary])
 async def unloading():
-    """ Удалить помеченные для удаления и обновить информацию в base.json"""
+    """ Удалить помеченное для удаления и обновить информацию в base.json"""
 
     if check_if_empty(file_name("main")) == True:
         create_file(fileName=file_name("main"))
@@ -54,7 +54,7 @@ async def unloading():
 
 @router.post('/post/nodes', status_code=201, tags=[Tags.glossary])
 async def post_nodes(nodes: List[NodeBase]):
-    ''' Добавить один или несколько "node(s)" '''
+    ''' Добавить один или несколько узлов '''
 
     name = "nodes"
 
@@ -67,7 +67,7 @@ async def post_nodes(nodes: List[NodeBase]):
 
 @router.post('/post/edges', status_code=201, tags=[Tags.glossary])
 async def post_edges(edges: List[EdgeBase]):
-    ''' Добавить один или несколько "edge(s)" '''
+    ''' Добавить одно или несколько соединений '''
 
     name = "edges"
 
@@ -81,35 +81,35 @@ async def post_edges(edges: List[EdgeBase]):
 
 @router.put('/edit/nodes', status_code=201, tags=[Tags.glossary])
 async def edit_nodes(nodes: List[NodeBase]):
-    ''' Изменить один или несколько "node(s)" '''
+    ''' Изменить один или несколько узлов '''
 
     name = "nodes"
 
-    return edit_data(data=nodes,
-                     write_to=name,
+    return edit_data(new_data=nodes,
+                     fieldName=name,
                      mainFile=file_name("main"),
-                     fileName=file_name("node"),
+                     secondaryFile=file_name("node"),
                      fileDeleted=file_name("node_delete")
                      )
 
 
-@router.put('/edit/edges', status_code=201, tags=[Tags.glossary])
-async def edit_edges(edges: List[EdgeBase]):
-    ''' Изменить один или несколько "edge(s)" '''
+# @router.put('/edit/edges', status_code=201, tags=[Tags.glossary])
+# async def edit_edges(edges: List[EdgeBase]):
+#     ''' Изменить один или несколько "edge(s)" '''
 
-    name = "edges"
+#     name = "edges"
 
-    return edit_data(data=edges,
-                     write_to=name,
-                     mainFile=file_name("main"),
-                     fileName=file_name("edge"),
-                     fileDeleted=file_name("edge_delete")
-                     )
+#     return edit_data(data=edges,
+#                      write_to=name,
+#                      mainFile=file_name("main"),
+#                      fileName=file_name("edge"),
+#                      fileDeleted=file_name("edge_delete")
+#                      )
 
 
 @router.delete('/delete/nodes', status_code=204, tags=[Tags.glossary])
 async def delete_nodes(nodes: List[str]):
-    ''' Удалить один или несколько "node(s)" '''
+    ''' Удалить один или несколько узлов '''
 
     name = "nodes"
 
@@ -125,7 +125,7 @@ async def delete_nodes(nodes: List[str]):
 
 @router.delete('/delete/edges', status_code=204, tags=[Tags.glossary])
 async def delete_edges(edges: List[str]):
-    ''' Удалить один или несколько "edge(s)" '''
+    ''' Удалить одно или несколько соединений '''
 
     name = "edges"
 
