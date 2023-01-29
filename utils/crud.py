@@ -1,26 +1,30 @@
 import json
 import uuid
 from fastapi import HTTPException
-from schemas import ResultBase
+from schemas import ResultBase, NodeBase, AttributesNode
 
 from file_names import file_name
 from routers import file_name
 from utils.checks import (
     check_if_duplicate_key, check_if_duplicate_src_targ,
-    check_if_empty
+    check_if_empty, check_if_txt_and_return, extract_field
 )
 from utils.misc import clear_deleted, cascade_delete
 
 
+# Подменить значение key на uuid
+key_to_uuid = lambda data : [key.update({"key": uuid.uuid4().hex}) for key in data]
+
+
 def get_data(names, fileName, secondaries, secondaryDeleted):
     ''' Получить все что есть в главном файле за исключением помеченного на удаление '''
-    
-    read_and_turn_to_json = lambda to_read : [json.loads(i) for i in open(to_read, "r").readlines()]
+
+    read_and_turn_to_json = lambda to_read: [
+        json.loads(i) for i in open(to_read, "r").readlines()]
 
     with open(fileName, "r+") as base_data:
         read_file = json.load(base_data)
-        
-        
+
         for i, name in enumerate(names):
             new_data = read_and_turn_to_json(to_read=secondaries[i])
             read_file[name] = clear_deleted(fileName=fileName,
@@ -46,9 +50,6 @@ def create_file(fileName):
 
 def post_data(data, write_to, mainFile, fileName, fileDeleted):
     ''' Если файл создан и в нем есть элементы то добавить в существующий файл '''
-
-    ### Подменить значение key на uuid
-    key_to_uuid = lambda data : [key.update({"key": uuid.uuid4().hex}) for key in data]
 
     with open(fileName, 'a+') as base_file:
         new_data = [i.dict() for i in data]
@@ -91,10 +92,6 @@ def post_data(data, write_to, mainFile, fileName, fileDeleted):
         return base_file
 
 
-def edit_data(data, write_to, mainFile, fileName, fileDeleted):
-    pass
-
-
 def delete(new_data, mainFile, secondaryFile, fieldName, fileName):
     ''' Отметить node или edge для удаления '''
 
@@ -111,21 +108,22 @@ def delete(new_data, mainFile, secondaryFile, fieldName, fileName):
         for file in main_and_secondary:
             if check_if_duplicate_key(old_data=file,
                                       new_data=ready_new_data,
-                                      fieldName=fieldName) is True:
+                                      fieldName=fieldName) is False:
+                continue
+            else:
                 # Записать данные в файл и закончить выполнение функции
                 [base_file.write(json.dumps(i) + "\n") for i in ready_new_data]
                 if secondaryFile == file_name("node"):
                     cascade_delete(
                         new_data=ready_new_data,
                         old_data=get_data(
-                            names=["nodes", "edges"], 
-                            fileName=mainFile, 
-                            secondaries=[file_name("node"), file_name("edge")], 
+                            names=["nodes", "edges"],
+                            fileName=mainFile,
+                            secondaries=[file_name("node"), file_name("edge")],
                             secondaryDeleted=[file_name("node_delete"), file_name("edge_delete")]))
                 return
-            else:
-                raise HTTPException(status_code=404,
-                                    detail="Not found")
+
+            raise HTTPException(status_code=404, detail="Not found")
 
 
 def submit_to_base_file(elements, elements_deleted, main, names):
@@ -159,3 +157,51 @@ def submit_to_base_file(elements, elements_deleted, main, names):
         main_file.seek(0)
         json.dump(read_main_data, main_file, ensure_ascii=False, indent=2)
         [open(element, 'w').close() for element in elements]
+
+
+def edit_data(new_data, fieldName, mainFile, secondaryFile, fileDeleted):
+
+    ready_new_data = [i.dict() for i in new_data]
+    new_data_attributes = [i["attributes"] for i in ready_new_data]
+    main_and_secondary = [mainFile, secondaryFile]
+    
+    # Catch the "key" of the node that is being edited, ### done
+    # create new node with new "key" and "edited" data, ### done
+    # find element with they old key and put it into the "delete" function,
+    # catch keys of all edges that cascade deletion finds,
+    # create new edges while replacing deleted key from src or targ with the new one,
+
+    if check_if_duplicate_key(old_data=mainFile,
+                              new_data=ready_new_data,
+                              fieldName=fieldName) is False:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    base = check_if_txt_and_return(fileName=mainFile, fieldName=fieldName)
+    secondary = check_if_txt_and_return(fileName=secondaryFile, fieldName=fieldName)
+
+    old_keys = extract_field(ready_new_data, "key")
+    old_labels = extract_field(new_data_attributes, "label")
+    old_texts = extract_field(new_data_attributes, "text")
+
+    print(old_keys)
+    ### Load the base schema for Nodes and change keys
+    base_origin = [NodeBase(
+        key=uuid.uuid4().hex, 
+        attributes=AttributesNode(
+            label=old_labels[i],
+            text=old_texts[i])) 
+            for i, key in enumerate(old_keys)]
+
+    ### Write new elements with changed keys and delete old ones with connected edges
+    # post_data(
+    #     data=base_origin, 
+    #     write_to=fieldName, 
+    #     mainFile=mainFile, 
+    #     fileName=secondaryFile, 
+    #     fileDeleted=fileDeleted)
+    # delete(
+    #     new_data=old_keys, 
+    #     mainFile=mainFile, 
+    #     secondaryFile=secondaryFile, 
+    #     fieldName=fieldName, 
+    #     fileName=fileDeleted)
