@@ -1,7 +1,7 @@
 import json
 import uuid
 from fastapi import HTTPException
-from schemas import ResultBase, NodeBase, AttributesNode
+from schemas import ResultBase, NodeBase, AttributesNode, EdgeBase, AttributesEdge
 
 from file_names import file_name
 from routers import file_name
@@ -163,8 +163,13 @@ def edit_data(new_data, fieldName, mainFile, secondaryFile, fileDeleted):
 
     ready_new_data = [i.dict() for i in new_data]
     new_data_attributes = [i["attributes"] for i in ready_new_data]
-    main_and_secondary = [mainFile, secondaryFile]
+    secondaryEdgeFile = file_name("edge")
+    main_and_secondary = [mainFile, secondaryFile, secondaryEdgeFile]
     
+    old_keys = extract_field(ready_new_data, "key")
+    old_labels = extract_field(new_data_attributes, "label")
+    old_texts = extract_field(new_data_attributes, "text")
+
     # Catch the "key" of the node that is being edited, ### done
     # create new node with new "key" and "edited" data, ### done
     # find element with they old key and put it into the "delete" function,
@@ -177,28 +182,36 @@ def edit_data(new_data, fieldName, mainFile, secondaryFile, fileDeleted):
         raise HTTPException(status_code=404, detail="Not found")
 
     base = check_if_txt_and_return(fileName=mainFile, fieldName=fieldName)
-    secondary = check_if_txt_and_return(fileName=secondaryFile, fieldName=fieldName)
+    nodeSecondary = check_if_txt_and_return(fileName=secondaryFile, fieldName=fieldName)
+    # edgeSecondary = 
+#######################################################################
+    # print(edgeSecondary)
 
-    old_keys = extract_field(ready_new_data, "key")
-    old_labels = extract_field(new_data_attributes, "label")
-    old_texts = extract_field(new_data_attributes, "text")
-
-    print(old_keys)
     ### Load the base schema for Nodes and change keys
-    base_origin = [NodeBase(
+    node_base_origin = [NodeBase(
         key=uuid.uuid4().hex, 
         attributes=AttributesNode(
             label=old_labels[i],
             text=old_texts[i])) 
             for i, key in enumerate(old_keys)]
 
+    ### Load the base schema for Edges and change key for edge itself and key of 
+    ### corresponding node that was edited
+    edge_base_origin = [EdgeBase(
+        key=uuid.uuid4().hex,
+        source="str",
+        target="str",
+        attributes=AttributesEdge(size=0))]
+    print(edge_base_origin)
+
     ### Write new elements with changed keys and delete old ones with connected edges
-    # post_data(
-    #     data=base_origin, 
+    # [post_data(
+    #     data=base_file, 
     #     write_to=fieldName, 
     #     mainFile=mainFile, 
     #     fileName=secondaryFile, 
-    #     fileDeleted=fileDeleted)
+    #     fileDeleted=fileDeleted) 
+    # for base_file in [node_base_origin, edge_base_origin]]
     # delete(
     #     new_data=old_keys, 
     #     mainFile=mainFile, 
