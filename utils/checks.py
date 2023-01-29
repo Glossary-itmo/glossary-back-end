@@ -10,7 +10,8 @@ extract_field = lambda data, field: list(map(lambda x: x[field], data))
 def check_if_txt_and_return(fileName, fieldName):
     ''' Проверить если fileName имеет расширение .txt,
     загрузить соответствующим образом данные и вернуть их '''
-# Взять указанное "field" поле из "data" и записать в лист "x" и вернуть из lambda функции
+    
+    # Взять указанное "field" поле из "data" и записать в лист "x" и вернуть из lambda функции
     # в переменную "extract"
     # Check file extension
     if fileName.endswith(".txt"):
