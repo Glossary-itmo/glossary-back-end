@@ -216,7 +216,6 @@ def edit_data(new_data, fieldName, mainFile, secondaryFile, fileDeleted):
         for i, _ in enumerate(new_edges)]
 
     # Write new elements with changed keys and delete old ones with connected edges
-    print(edge_base_origin)
     [post_data(
         data=base_file,
         write_to=fieldName[i],
