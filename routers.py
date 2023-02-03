@@ -82,27 +82,14 @@ async def edit_nodes(nodes: List[NodeBase]):
     ''' Изменить один или несколько узлов '''
 
     name = "nodes"
+    edgeName = "edges"
 
     return edit_data(new_data=nodes,
-                     fieldName=name,
+                     fieldName=[name, edgeName],
                      mainFile=FileNames.mainFileName,
-                     secondaryFile=FileNames.nodeFileName,
-                     fileDeleted=FileNames.deletedNodeFileName
+                     secondaryFile=[FileNames.nodeFileName, FileNames.edgeFileName],
+                     fileDeleted=[FileNames.deletedNodeFileName, FileNames.deletedEdgeFileName]
                      )
-
-
-# @router.put('/edit/edges', status_code=201, tags=[Tags.glossary])
-# async def edit_edges(edges: List[EdgeBase]):
-#     ''' Изменить один или несколько "edge(s)" '''
-
-#     name = "edges"
-
-#     return edit_data(data=edges,
-#                      write_to=name,
-#                      mainFile=FileNames.mainFileName,
-#                      fileName=FileNames.edgeFileName,
-#                      fileDeleted=FileNames.deletedEdgeFileName
-#                      )
 
 
 @router.delete('/delete/nodes', status_code=204, tags=[Tags.glossary])
